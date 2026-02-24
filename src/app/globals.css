@@ -1,26 +1,25 @@
 @import "tailwindcss";
 
+/* 1. Standard CSS Variables (The Foundation) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary: #001d5c;
+  --primary-hover: #3a6df8;
+  --secondary: #043996;
+  --surface: #f8fafc;
+  --card: #ffffff;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* 2. Tailwind v4 Theme Mapping */
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* 3. Global Reset to prove it works */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--surface);
+  color: #0f172a;
 }
