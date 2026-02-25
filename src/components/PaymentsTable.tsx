@@ -73,31 +73,39 @@ export function PaymentsTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {filteredData.map((item) => (
-              <tr
-                key={item.residentId}
-                className="group hover:bg-slate-50/50 transition-colors cursor-pointer"
-                onClick={() => setSelectedResident(item)}
-              >
-                <td className="px-6 py-4 font-bold text-slate-900">
-                  {item.name}
-                </td>
-                <td className="px-6 py-4 font-bold text-slate-500">
-                  {item.roomNumber}
-                </td>
-                <td className="px-6 py-4 text-right font-bold text-green-600">
-                  Gh₵{parseFloat(item.totalPaid).toLocaleString()}
-                </td>
-                <td className="px-6 py-4 text-right font-black text-slate-900">
-                  Gh₵{parseFloat(item.balance).toLocaleString()}
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <span className="text-[10px] font-black uppercase text-primary bg-primary/5 px-3 py-1 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
-                    Manage
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {filteredData.map((item) => {
+              // Parse balance once to use in conditional styling
+              const balanceValue = parseFloat(item.balance);
+
+              return (
+                <tr
+                  key={item.residentId}
+                  className="group hover:bg-slate-50/50 transition-colors cursor-pointer"
+                  onClick={() => setSelectedResident(item)}
+                >
+                  <td className="px-6 py-4 font-bold text-slate-900">
+                    {item.name}
+                  </td>
+                  <td className="px-6 py-4 font-bold text-slate-500">
+                    {item.roomNumber}
+                  </td>
+                  <td className="px-6 py-4 text-right font-bold text-green-600">
+                    Gh₵{parseFloat(item.totalPaid).toLocaleString()}
+                  </td>
+                  {/* DYNAMIC BALANCE COLORING */}
+                  <td
+                    className={`px-6 py-4 text-right font-black ${balanceValue > 0 ? "text-red-600" : "text-slate-900"}`}
+                  >
+                    Gh₵{balanceValue.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className="text-[10px] font-black uppercase text-primary bg-primary/5 px-3 py-1 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
+                      Manage
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -149,7 +157,6 @@ export function PaymentsTable({
                         </p>
                       </div>
 
-                      {/* Fixed Action Area Width */}
                       <div className="shrink-0 w-32 flex justify-end">
                         {payment.receiptUrl ? (
                           <a

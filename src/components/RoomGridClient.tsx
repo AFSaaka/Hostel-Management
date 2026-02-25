@@ -68,6 +68,9 @@ export default function RoomGridClient({
             const isFull = room.activeResidents >= room.capacity;
             const ratio = `${room.activeResidents}/${room.capacity}`;
 
+            // 🚀 PRODUCTION LOGIC: Room can only be deleted if empty
+            const canDelete = room.activeResidents === 0;
+
             return (
               <div
                 key={room.id}
@@ -101,7 +104,12 @@ export default function RoomGridClient({
                     <h3 className="text-xl font-black text-slate-900">
                       Room {room.roomNumber}
                     </h3>
-                    <RoomActions room={room} isSuperadmin={isSuperadmin} />
+                    {/* 🚀 Passing canDelete to the actions component */}
+                    <RoomActions
+                      room={room}
+                      isSuperadmin={isSuperadmin}
+                      canDelete={canDelete}
+                    />
                   </div>
 
                   <p className="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-4 min-h-2.5rem">
