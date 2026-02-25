@@ -26,31 +26,53 @@ import Link from "next/link";
 function formatAuditDescription(log: {
   action: string;
   entityType: string;
+  oldData: string | null;
   newData: string | null;
 }) {
-  if (!log.newData) return `performed ${log.action} on ${log.entityType}`;
-
   try {
-    const data = JSON.parse(log.newData);
+    const next = log.newData ? JSON.parse(log.newData) : null;
+    const prev = log.oldData ? JSON.parse(log.oldData) : null;
+
+    // 1. Identify the subject name (Resident Name, Room Number, etc.)
+    const subjectName = next?.name || next?.roomNumber || next?.fullName || "";
+    const subjectLabel = subjectName ? `(${subjectName})` : "";
 
     switch (log.action) {
       case "CREATE":
         if (log.entityType === "payments") {
-          return `recorded a Gh₵${Number(data.amount).toLocaleString()} ${data.method} payment`;
+          return `recorded a Gh₵${Number(next.amount).toLocaleString()} ${next.method} payment for resident ID ${next.residentId.slice(0, 8)}`;
         }
-        return `created a new ${log.entityType.slice(0, -1)}`;
-
-      case "UPLOAD_RECEIPT":
-        return `uploaded a new payment receipt`;
+        return `created ${log.entityType.slice(0, -1)} ${subjectLabel}`;
 
       case "UPDATE":
-        return `updated details for ${log.entityType}`;
+        // 2. Identify what actually changed
+        let changes = "";
+        if (prev && next) {
+          const changedKeys = Object.keys(next).filter(
+            (key) =>
+              JSON.stringify(prev[key]) !== JSON.stringify(next[key]) &&
+              !["updatedAt", "id"].includes(key),
+          );
+
+          if (changedKeys.length > 0) {
+            changes = ` (changed: ${changedKeys.join(", ")})`;
+          }
+        }
+
+        return `updated details for ${log.entityType.slice(0, -1)} ${subjectLabel}${changes}`;
+
+      case "DELETE":
+        const oldSubject = prev?.name || prev?.roomNumber || "record";
+        return `deleted ${log.entityType.slice(0, -1)}: ${oldSubject}`;
+
+      case "UPLOAD_RECEIPT":
+        return `uploaded a new payment receipt for ${log.entityType}`;
 
       case "LOGIN":
         return `signed into the management system`;
 
       default:
-        return `${log.action.toLowerCase()} on ${log.entityType}`;
+        return `${log.action.toLowerCase()} on ${log.entityType} ${subjectLabel}`;
     }
   } catch (e) {
     return `${log.action.toLowerCase()} on ${log.entityType}`;
@@ -113,6 +135,7 @@ export default async function DashboardHome() {
           actorName: profiles.fullName,
           createdAt: auditLogs.createdAt,
           entityType: auditLogs.entityType,
+          oldData: auditLogs.oldData, // 🚀 ADD THIS
           newData: auditLogs.newData,
         })
         .from(auditLogs)
